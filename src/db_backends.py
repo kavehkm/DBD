@@ -1,5 +1,4 @@
 # pyodbc: mssql connector
-from sqlite3 import connect
 import pyodbc
 
 
