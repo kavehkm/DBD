@@ -1,7 +1,6 @@
 # internal
 from src import console
-from src import settings
-from src import db_backends
+from src import functions as fn
 
 
 class BaseWidget(object):
@@ -56,19 +55,7 @@ class Databases(BaseWidget):
     @property
     def databases(self):
         if self._databases is None:
-            databases = list()
-            for db in settings.DATABASES:
-                backend = None
-                dbms = db.get('dbms')
-                if dbms == 'sqlite':
-                    backend = db_backends.SQLite
-                elif dbms == 'mssql':
-                    backend = db_backends.MSSQL
-                elif dbms == 'mysql':
-                    pass
-                if backend and backend.check_conf(**db):
-                    databases.append(backend(**db))
-            self._databases = databases
+            self._databases = fn.load_databases()
         return self._databases
 
     def do(self):
@@ -93,9 +80,21 @@ class Tables(BaseWidget):
         console.tables(database.tables())
 
 
+class CreateSnap(BaseWidget):
+    """Create Snap Widget"""
+    CODE = 5
+    NAME = 'CreateSnap'
+    PARENT = Databases.CODE
+
+    def do(self):
+        database = self.parent.databases[int(input('Database: '))]
+        fn.create_snap(database)
+        console.success('Snap created successfully')
+
+
 class Compare(BaseWidget):
     """Database Compare Widget"""
-    CODE = 5
+    CODE = 6
     NAME = 'Compare'
     PARENT = Databases.CODE
 
