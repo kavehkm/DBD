@@ -1,11 +1,14 @@
+# standard
+import os
 # pyodbc: mssql connector
 import pyodbc
+# sqlite3: sqlite connector
+import sqlite3
 
 
 class BaseBackend(object):
     """Base Backend"""
-    def __init__(self, **kwargs):
-        pass
+    ENGINE = 'Base'
 
     @property
     def name(self):
@@ -14,6 +17,21 @@ class BaseBackend(object):
     @classmethod
     def check_conf(cls, **kwargs):
         pass
+
+    @staticmethod
+    def execute(conn, sql, *params, method='fetchall'):
+        cursor = conn.cursor()
+        cursor.execute(sql, params)
+        result = None
+        if method == 'fetchval':
+            result = cursor.fetchval()
+        elif method == 'fetchone':
+            result = cursor.fetchone()
+        elif method == 'fetchall':
+            result = cursor.fetchall()
+        # close cursor
+        cursor.close()
+        return result
 
     def tables(self):
         pass
@@ -27,16 +45,18 @@ class BaseBackend(object):
 
 class MSSQL(BaseBackend):
     """Microsoft SQL Server"""
+    ENGINE = 'MSSQL'
+
     def __init__(self, **kwargs):
-            self.server = kwargs.get('server')
-            self.database = kwargs.get('database')
-            self.username = kwargs.get('username')
-            self.password = kwargs.get('password')
-            self.conn = self.connection(self.server, self.database, self.username, self.password)
+        self.server = kwargs.get('server')
+        self.database = kwargs.get('database')
+        self.username = kwargs.get('username')
+        self.password = kwargs.get('password')
+        self.conn = self.connection(self.server, self.database, self.username, self.password)
 
     @property
     def name(self):
-        return 'MSSQL->{}->{}'.format(self.server, self.database)
+        return '{}@{}'.format(self.database, self.server)
 
     @staticmethod
     def connection(server, database, username, password):
@@ -55,29 +75,11 @@ class MSSQL(BaseBackend):
             return False
         try:
             conn = cls.connection(server, database, username, password)
-            cursor = conn.cursor()
-            cursor.execute('SELECT @@VERSION')
-            cursor.close()
-            conn.close()
+            cls.execute(conn, 'SELECT @@VERSION')
         except Exception:
             return False
         else:
             return True
-
-    def _execute(self, sql, *params, method='fetchall'):
-        cursor = self.conn.cursor()
-        cursor.execute(sql, params)
-        result = None
-        if method == 'fetchval':
-            result = cursor.fetchval()
-        elif method == 'fetchone':
-            record = cursor.fetchone()
-            result = record[0] if record else None
-        elif method == 'fetchall':
-            result = [record for record in cursor.fetchall()]
-        # close cursor
-        cursor.close()
-        return result
 
     def tables(self):
         sql = """
@@ -85,4 +87,36 @@ class MSSQL(BaseBackend):
             FROM [?].INFORMATION_SCHEMA.TABLES
             WHERE TABLE_TYPE = 'BASE TABLE'
         """
-        return self._execute(sql, self.database)
+        return self.execute(self.conn, sql, self.database)
+
+
+class SQLite(BaseBackend):
+    """SQLite"""
+    ENGINE = 'SQLite'
+
+    def __init__(self, **kwargs):
+        self.path = kwargs.get('path')
+        self.conn = self.connection(self.path)
+
+    @property
+    def name(self):
+        return self.path
+
+    @staticmethod
+    def connection(path):
+        return sqlite3.connect(path)
+
+    @classmethod
+    def check_conf(cls, **kwargs):
+        path = kwargs.get('path')
+        if not path or not os.path.exists(path):
+            return False
+        return True
+
+    def tables(self):
+        sql = """
+            SELECT name
+            FROM sqlite_master
+            WHERE type='table';
+        """
+        return [table[0] for table in self.execute(self.conn, sql)]
