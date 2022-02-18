@@ -31,7 +31,7 @@ def databases(databases):
     for i, db in enumerate(databases):
         panel = Panel(
             title=str(i),
-            renderable='[bold red]{}[/bold red]\n[yellow]{}'.format(db.DBMS, db.name)
+            renderable='[bold red]{}[/bold red]\n[yellow]{}'.format(db.ENGINE, db.name)
         )
         columns.add_renderable(panel)
     print(columns)
