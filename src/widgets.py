@@ -1,3 +1,9 @@
+# internal
+from src import console
+from src import settings
+from src import db_backends
+
+
 class BaseWidget(object):
     """BaseWidgets"""
     CODE = 0
@@ -27,7 +33,7 @@ class BaseWidget(object):
         self._childs.remove(widget)
 
     def do(self):
-        print(self.NAME, 'do something...')
+        pass
 
 
 class Entry(BaseWidget):
@@ -43,12 +49,55 @@ class Databases(BaseWidget):
     NAME = 'Databases'
     PARENT = Entry.CODE
 
+    def __init__(self):
+        super().__init__()
+        self._databases = None
+
+    @property
+    def databases(self):
+        if self._databases is None:
+            databases = list()
+            for db in settings.DATABASES:
+                backend = None
+                dbms = db.get('dbms')
+                if dbms == 'sqlite':
+                    backend = db_backends.SQLite
+                elif dbms == 'mssql':
+                    backend = db_backends.MSSQL
+                elif dbms == 'mysql':
+                    pass
+                if backend and backend.check_conf(**db):
+                    databases.append(backend(**db))
+            self._databases = databases
+        return self._databases
+
+    def do(self):
+        console.databases(self.databases)
+
 
 class Snaps(BaseWidget):
     """Snaps Widget"""
     CODE = 3
     NAME = 'Snaps'
     PARENT = Entry.CODE
+
+
+class Tables(BaseWidget):
+    """Database Tables Widget"""
+    CODE = 4
+    NAME = 'Tables'
+    PARENT = Databases.CODE
+
+    def do(self):
+        database = self.parent.databases[int(input('Database: '))]
+        console.tables(database.tables())
+
+
+class Compare(BaseWidget):
+    """Database Compare Widget"""
+    CODE = 5
+    NAME = 'Compare'
+    PARENT = Databases.CODE
 
 
 # initialize widgets and set relations
