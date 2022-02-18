@@ -75,8 +75,13 @@ class Tables(BaseWidget):
     NAME = 'Tables'
     PARENT = Databases.CODE
 
+    def __init__(self):
+        super().__init__()
+        self.current_database = None
+
     def do(self):
         database = self.parent.databases[int(input('Database: '))]
+        self.current_database = database
         console.tables(database.tables())
 
 
@@ -97,6 +102,31 @@ class Compare(BaseWidget):
     CODE = 6
     NAME = 'Compare'
     PARENT = Databases.CODE
+
+
+class Columns(BaseWidget):
+    """Table Columns Widget"""
+    CODE = 7
+    NAME = 'Columns'
+    PARENT = Tables.CODE
+
+    def do(self):
+        table = self.parent.current_database.tables()[int(input('Table: '))]
+        columns = self.parent.current_database.columns(table)
+        console.columns(columns)
+
+
+class Records(BaseWidget):
+    """Table Records Widget"""
+    CODE = 8
+    NAME = 'Records'
+    PARENT = Tables.CODE
+
+    def do(self):
+        table = self.parent.current_database.tables()[int(input('Table: '))]
+        columns = self.parent.current_database.columns(table)
+        records = self.parent.current_database.records(table)
+        console.records(columns, records)
 
 
 # initialize widgets and set relations
