@@ -3,6 +3,7 @@ from rich.tree import Tree
 from rich.panel import Panel
 from rich.columns import Columns
 from rich.console import Console
+from rich.progress import track
 
 
 console = Console()
@@ -13,6 +14,10 @@ print = console.print
 
 def error(text):
     print('[red bold]{}'.format(text))
+
+
+def success(text):
+    print('[green bold]{}'.format(text))
 
 
 def menu(items):
@@ -46,3 +51,7 @@ def tables(tables):
         )
         columns.add_renderable(panel)
     print(columns)
+
+
+def progress(seq, description):
+    return track(seq, description)
