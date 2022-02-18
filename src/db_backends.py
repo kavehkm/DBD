@@ -120,3 +120,15 @@ class SQLite(BaseBackend):
             WHERE type='table';
         """
         return [table[0] for table in self.execute(self.conn, sql)]
+
+    def columns(self, table):
+        sql = "SELECT * FROM {}".format(table)
+        cursor = self.conn.cursor()
+        cursor.execute(sql)
+        columns = [column[0] for column in cursor.description]
+        cursor.close()
+        return columns
+
+    def records(self, table):
+        sql = "SELECT * FROM {}".format(table)
+        return self.execute(self.conn, sql)
