@@ -1,6 +1,7 @@
 # rich
 from rich.tree import Tree
 from rich.panel import Panel
+from rich.table import Table
 from rich.columns import Columns
 from rich.console import Console
 from rich.progress import track
@@ -51,6 +52,19 @@ def tables(tables):
         )
         columns.add_renderable(panel)
     print(columns)
+
+
+def columns(columns):
+    tables(columns)
+
+
+def records(columns, records):
+    table = Table()
+    for column in columns:
+        table.add_column(column)
+    for record in records:
+        table.add_row(*[str(i) for i in record])
+    print(table)
 
 
 def progress(seq, description):
