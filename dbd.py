@@ -17,12 +17,12 @@ class Runner(object):
         try:
             self._current_widget.do()
         except Exception as e:
-            print(e)
+            console.error(str(e))
 
     def print_menu(self):
         # clear menu
         self._menu.clear()
-        # add current widget child as menu items
+        # add current widget childs as menu items
         for i, widget in enumerate(self._current_widget.childs):
             self._menu[str(i)] = widget.NAME
         # if current widget has parent add back option
@@ -39,10 +39,10 @@ class Runner(object):
             answer = input(': ')
             if answer in self._menu:
                 break
-            print('EEK')
+            console.error('EEK')
         # dispatch
         if answer == 'x':
-            print('Goodbye')
+            console.print('Goodbye')
             sys.exit(0)
         elif answer == 'b':
             self._current_widget = self._current_widget.parent
