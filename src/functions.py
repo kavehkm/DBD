@@ -1,6 +1,8 @@
 # internal
-from . import settings
-from . import db_backends
+import time
+from src import console
+from src import settings
+from src import db_backends
 
 
 def load_databases():
@@ -10,10 +12,16 @@ def load_databases():
         dbms = db['dbms']
         if dbms == 'mssql':
             backend = db_backends.MSSQL
-        elif dbms == 'mysql':
-            pass
         elif dbms == 'sqlite':
+            backend = db_backends.SQLite
+        elif dbms == 'mysql':
             pass
         if backend and backend.check_conf(**db):
             databases.append(backend(**db))
     return databases
+
+
+def create_snap(database):
+    tables = database.tables()
+    for _ in console.progress(tables, 'Snapping'):
+        time.sleep(0.5)
