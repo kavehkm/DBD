@@ -82,12 +82,25 @@ class MSSQL(BaseBackend):
             return True
 
     def tables(self):
-        sql = """
+        sql = f"""
             SELECT TABLE_NAME
-            FROM [?].INFORMATION_SCHEMA.TABLES
+            FROM {self.database}.INFORMATION_SCHEMA.TABLES
             WHERE TABLE_TYPE = 'BASE TABLE'
         """
-        return self.execute(self.conn, sql, self.database)
+        return [table[0] for table in self.execute(self.conn, sql)]
+
+    def columns(self, table):
+        sql = f"""
+            SELECT COLUMN_NAME
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_NAME = '{table}'
+        """
+        columns = [column[0] for column in self.execute(self.conn, sql)]
+        return columns
+
+    def records(self, table):
+        sql = "SELECT * FROM {}".format(table)
+        return self.execute(self.conn, sql)
 
 
 class SQLite(BaseBackend):
