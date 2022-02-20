@@ -11,6 +11,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SETTINGS_FILE = os.path.join(BASE_DIR, 'settings.json')
 
 
+# snap directory
+SNAP_DIR = os.path.join(BASE_DIR, 'snaps')
+
+
 # load settings
 try:
     with open(SETTINGS_FILE, 'rt') as f:
