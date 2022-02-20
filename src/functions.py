@@ -1,5 +1,4 @@
 # internal
-import time
 from src import console
 from src import settings
 from src import db_backends
@@ -19,9 +18,3 @@ def load_databases():
         if backend and backend.check_conf(**db):
             databases.append(backend(**db))
     return databases
-
-
-def create_snap(database):
-    tables = database.tables()
-    for _ in console.progress(tables, 'Snapping'):
-        time.sleep(0.5)
