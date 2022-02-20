@@ -31,7 +31,7 @@ class Runner(object):
         # finally add exit into menu
         self._menu['x'] = 'Exit'
         items = ['({}) {}'.format(key, value) for key, value in self._menu.items()]
-        console.menu(items)
+        console.render_menu(items)
 
     def dispatch(self):
         # get answer
