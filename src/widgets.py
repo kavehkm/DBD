@@ -1,5 +1,7 @@
 # internal
+from src import mem
 from src import console
+from src.snap import Snap
 from src import functions as fn
 
 
@@ -18,18 +20,18 @@ class BaseWidget(object):
         return self._parent
 
     @parent.setter
-    def parent(self, widget):
-        self._parent = widget
+    def parent(self, w):
+        self._parent = w
 
     @property
     def childs(self):
         return self._childs
 
-    def add_child(self, widget):
-        self._childs.append(widget)
+    def add_child(self, w):
+        self._childs.append(w)
 
-    def remove_child(self, widget):
-        self._childs.remove(widget)
+    def remove_child(self, w):
+        self._childs.remove(w)
 
     def do(self):
         pass
@@ -59,7 +61,7 @@ class Databases(BaseWidget):
         return self._databases
 
     def do(self):
-        console.databases(self.databases)
+        console.render_databases(self.databases)
 
 
 class Snaps(BaseWidget):
@@ -67,6 +69,10 @@ class Snaps(BaseWidget):
     CODE = 3
     NAME = 'Snaps'
     PARENT = Entry.CODE
+
+    def do(self):
+        snaps = mem.get('snaps', [])
+        console.render_snaps(snaps)
 
 
 class Tables(BaseWidget):
@@ -82,7 +88,7 @@ class Tables(BaseWidget):
     def do(self):
         database = self.parent.databases[int(input('Database: '))]
         self.current_database = database
-        console.tables(database.tables())
+        console.render_tables(database.tables())
 
 
 class CreateSnap(BaseWidget):
@@ -93,7 +99,10 @@ class CreateSnap(BaseWidget):
 
     def do(self):
         database = self.parent.databases[int(input('Database: '))]
-        fn.create_snap(database)
+        snap = Snap.from_database(database)
+        snaps = mem.get('snaps', [])
+        snaps.append(snap)
+        mem.set('snaps', snaps)
         console.success('Snap created successfully')
 
 
@@ -101,7 +110,7 @@ class Compare(BaseWidget):
     """Database Compare Widget"""
     CODE = 6
     NAME = 'Compare'
-    PARENT = Databases.CODE
+    PARENT = Snaps.CODE
 
 
 class Columns(BaseWidget):
@@ -113,7 +122,7 @@ class Columns(BaseWidget):
     def do(self):
         table = self.parent.current_database.tables()[int(input('Table: '))]
         columns = self.parent.current_database.columns(table)
-        console.columns(columns)
+        console.render_columns(columns)
 
 
 class Records(BaseWidget):
@@ -126,7 +135,7 @@ class Records(BaseWidget):
         table = self.parent.current_database.tables()[int(input('Table: '))]
         columns = self.parent.current_database.columns(table)
         records = self.parent.current_database.records(table)
-        console.records(columns, records)
+        console.render_records(columns, records)
 
 
 # initialize widgets and set relations
