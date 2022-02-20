@@ -26,3 +26,24 @@ class Snap(object):
             records = [list(record) for record in database.records(table)]
             data_frames[table] = pd.DataFrame(records, columns=columns)
         return Snap(database.name, data_frames, created_at)
+
+    def difference(self, other):
+        """deleted: frames that does not exists in other"""
+        return list(set(self.data_frames.keys()) - set(other.data_frames.keys()))
+
+    def r_difference(self, other):
+        """new: frames that does not exists in self"""
+        return list(set(other.data_frames.keys()) - set(self.data_frames.keys()))
+
+    def common(self, other):
+        """frames that exists in both `self` and `other`"""
+        return list(set(self.data_frames.keys()) & set(other.data_frames.keys()))
+
+    def changed(self, other):
+        """common frames that changed"""
+        changed = list()
+        for frame in self.common(other):
+            r = self.data_frames[frame].compare(other.data_frames[frame])
+            if not r.empty:
+                changed.append(frame)
+        return changed
