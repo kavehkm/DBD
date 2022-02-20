@@ -112,6 +112,21 @@ class Compare(BaseWidget):
     NAME = 'Compare'
     PARENT = Snaps.CODE
 
+    def do(self):
+        # get snaps
+        snaps = mem.get('snaps', [])
+        snap1 = snaps[int(input('Snap1: '))]
+        snap2 = snaps[int(input('Snap2: '))]
+        # compare
+        deleted = snap1.difference(snap2)
+        new = snap1.r_difference(snap1)
+        changed = snap1.changed(snap2)
+        # generate report
+        if not any([deleted, new, changed]):
+            console.print('No changes detected')
+        else:
+            console.render_compare(new, deleted, changed)
+
 
 class Columns(BaseWidget):
     """Table Columns Widget"""
