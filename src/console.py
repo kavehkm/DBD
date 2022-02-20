@@ -2,6 +2,7 @@
 from rich.tree import Tree
 from rich.panel import Panel
 from rich.table import Table
+from rich.style import Style
 from rich.columns import Columns
 from rich.console import Console
 from rich.progress import track
@@ -80,3 +81,23 @@ def render_records(columns, records):
 
 def progress(seq, description):
     return track(seq, description)
+
+
+def render_compare(new, deleted, changed):
+    # new
+    new_style = Style(color='green')
+    new_columns = Columns(title='New')
+    # deleted
+    deleted_style = Style(color='red')
+    deleted_columns = Columns(title='Deleted')
+    # changed
+    changed_style = Style(color='cyan')
+    changed_columns = Columns(title='Changed')
+
+    for n in new:
+        new_columns.add_renderable(Panel(n, style=new_style))
+    for d in deleted:
+        deleted_columns.add_renderable(Panel(d, style=deleted_style))
+    for c in changed:
+        changed_columns.add_renderable(Panel(c, style=changed_style))
+    print(new_columns, deleted_columns, changed_columns, sep='\n\n')
