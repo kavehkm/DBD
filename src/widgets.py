@@ -119,7 +119,7 @@ class Compare(BaseWidget):
         snap2 = snaps[int(input('Snap2: '))]
         # compare
         deleted = snap1.difference(snap2)
-        new = snap1.r_difference(snap1)
+        new = snap1.r_difference(snap2)
         changed = snap1.changed(snap2)
         # generate report
         if not any([deleted, new, changed]):
