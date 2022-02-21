@@ -43,7 +43,8 @@ class Snap(object):
         """common frames that changed"""
         changed = list()
         for frame in self.common(other):
-            r = self.data_frames[frame].compare(other.data_frames[frame])
+            left, right = self.data_frames[frame].align(other.data_frames[frame], join='outer')
+            r = left.compare(right)
             if not r.empty:
                 changed.append(frame)
         return changed
