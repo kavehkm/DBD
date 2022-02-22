@@ -56,7 +56,7 @@ class MSSQL(BaseBackend):
 
     @property
     def name(self):
-        return '{}@{}'.format(self.database, self.server)
+        return '{}@{}'.format(self.database, self.server.replace('.\\', ''))
 
     @staticmethod
     def connection(server, database, username, password):
