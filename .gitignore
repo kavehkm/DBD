@@ -133,3 +133,6 @@ settings.json
 
 # pycharm
 .idea/
+
+# snap directory
+snaps/
