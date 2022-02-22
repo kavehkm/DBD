@@ -1,4 +1,5 @@
 # standard
+import os
 from datetime import datetime
 # internal
 from src import console
@@ -8,15 +9,15 @@ import pandas as pd
 
 class Snap(object):
     """Snap"""
-    CREATED_AT_FORMAT = '%Y-%m-%d %H:%M:%S'
+    CREATED_AT_FORMAT = '%Y-%m-%d %H-%M-%S'
 
     def __init__(self, database_name, data_frames, created_at=None):
         self.database_name = database_name
         self.data_frames = data_frames
         self.created_at = created_at or datetime.now().strftime(self.CREATED_AT_FORMAT)
 
-    @classmethod
-    def from_database(cls, database, created_at=None, progress=True):
+    @staticmethod
+    def from_database(database, created_at=None, progress=True):
         data_frames = dict()
         tables = database.tables()
         if progress:
@@ -26,6 +27,30 @@ class Snap(object):
             records = [list(record) for record in database.records(table)]
             data_frames[table] = pd.DataFrame(records, columns=columns)
         return Snap(database.name, data_frames, created_at)
+
+    @staticmethod
+    def from_pickle(path):
+        base_name = os.path.basename(path).replace('Snap__', '')
+        database_name, created_at = base_name.rsplit('@', 1)
+        frames = dict()
+        for content in os.listdir(path):
+            if content.endswith('.pickle'):
+                frame = pd.read_pickle(os.path.join(path, content))
+                name = content.split('.')[0]
+                frames[name] = frame
+        return Snap(database_name, frames, created_at)
+
+    def to_pickle(self, path, progress=True):
+        name = 'Snap__{}@{}'.format(self.database_name, self.created_at)
+        path = os.path.join(path, name)
+        if not os.path.exists(path):
+            os.mkdir(path)
+        frames = self.data_frames.keys()
+        if progress:
+            frames = console.progress(frames, 'Saving')
+        for frame in frames:
+            df = self.data_frames[frame]
+            df.to_pickle(os.path.join(path, f'{frame}.pickle'))
 
     def difference(self, other):
         """deleted: frames that does not exists in other"""
