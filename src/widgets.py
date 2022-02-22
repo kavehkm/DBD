@@ -1,6 +1,7 @@
 # internal
 from src import mem
 from src import console
+from src import settings
 from src.snap import Snap
 from src import functions as fn
 
@@ -71,7 +72,10 @@ class Snaps(BaseWidget):
     PARENT = Entry.CODE
 
     def do(self):
-        snaps = mem.get('snaps', [])
+        snaps = mem.get('snaps')
+        if snaps is None:
+            snaps = fn.load_snaps()
+            mem.set('snaps', snaps)
         console.render_snaps(snaps)
 
 
@@ -98,12 +102,16 @@ class CreateSnap(BaseWidget):
     PARENT = Databases.CODE
 
     def do(self):
+        # find database
         database = self.parent.databases[int(input('Database: '))]
+        # create snap
         snap = Snap.from_database(database)
-        snaps = mem.get('snaps', [])
-        snaps.append(snap)
-        mem.set('snaps', snaps)
         console.success('Snap created successfully')
+        # save created snap into snaps directory as pickle
+        snap.to_pickle(settings.SNAP_DIR)
+        console.success('Snap saved successfully')
+        # clear cached snaps
+        mem.delete('snaps')
 
 
 class Compare(BaseWidget):
