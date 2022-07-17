@@ -70,6 +70,19 @@ class Snap(object):
         for frame in self.common(other):
             left, right = self.data_frames[frame].align(other.data_frames[frame], join='outer')
             r = left.compare(right)
+            tdic = {}
+            tdic2 = {}
             if not r.empty:
                 changed.append(frame)
+                count = 1;
+                for c, i in r.items():
+                    for a, b in i.items():
+
+                        if (not tdic and a not in tdic.keys()):
+                            tdic[a] = b
+                        else:
+                            tdic2[a] = b
+                console.print(tdic,tdic2)
+                for k,v in tdic2.items():
+                    console.print(f"Change in line {k} from {v} to {tdic[k]}")
         return changed
