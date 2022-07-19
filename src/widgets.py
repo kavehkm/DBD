@@ -191,21 +191,34 @@ class ChangedFields(BaseWidget):
 
     def do (self):
         df = pandas.DataFrame()
-        changed_columns = mem.get('rowChanged')
-        selected_column = mem.get('selected_tbl')
-        selected_detail = mem.get('selected_clmn')
-        for i in changed_columns:
-            if(selected_column in list(i.keys())):
-                df = i.get(selected_column)
+
+        #dataframe containing all changes
+        changed_row = mem.get('rowChanged')
+
+        selected_table = mem.get('selected_tbl')
+        selected_column = mem.get('selected_clmn')
+
+        #obtaining cropped dataframe of changes for selected table
+        for i in changed_row:
+            if(selected_table in list(i.keys())):
+                df = i.get(selected_table)
+
+        # for j in (i for i in changed_row if selected_table in list(i.keys())):
+        #     df = i.get(selected_table)
+
+        #user selection
         selection = int(input('Column: '))
-        for i in selected_detail:
+
+        #obtaining a cropped dataframe for the selected column
+        for i in selected_column:
             if selection in i.keys():
                 value = i.get(selection)
-        user_selection = df.loc[:,value ].fillna(-1)
+
+        #replacing null values (values that haven't been changed or have benn deleted)       
+        user_selection = df.loc[:,value ].fillna(">>??<<")
         
-        for index, row in user_selection.iterrows():
-            if not(row.get('self') == -1 and row.get('other') == -1):
-                console.print(f"Change in line {index} from {row.get('self')} to {row.get('other')}")
+        console.render_changedTable(value, user_selection)
+
         df.iloc[0:0]
 
 # initialize widgets and set relations
