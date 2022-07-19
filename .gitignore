@@ -137,4 +137,5 @@ settings.json
 # snap directory
 snaps/
 
+chinook.db
 
