@@ -132,8 +132,8 @@ class Compare(BaseWidget):
         new = snap1.r_difference(snap2)
         changed = snap1.changed(snap2)
 
-        mem.set("columnChanged", changed[0])
-        mem.set("rowChanged", changed[1])
+        mem.set("table_changed", changed[0])
+        mem.set("all_changes", changed[1])
 
         # generate report
         if not any([deleted, new, changed[0]]):
@@ -166,53 +166,49 @@ class Records(BaseWidget):
         records = self.parent.current_database.records(table)
         console.render_records(columns, records)
 
-class ChangedColumns(BaseWidget):
+class ChangedTables(BaseWidget):
     """Changed Columns in a Table"""
     CODE = 9
-    NAME = 'View Changed Columns'
+    NAME = 'View column changes in aTable'
     PARENT = Compare.CODE
 
     def do(self):
         
-        changed_columns = mem.get('columnChanged',[])
-        selected_tbl = list(changed_columns.keys())[int(input('Table: '))]
-        a = console.render_changedColumns(changed_columns,selected_tbl)
+        changed_tables = mem.get('table_changed',[])
+        selected_tbl = list(changed_tables.keys())[int(input('Table: '))]
+        a = console.render_changedColumns(changed_tables,selected_tbl)
 
         mem.set('selected_tbl', selected_tbl)
         mem.set('selected_clmn', a)
         
         
 
-class ChangedFields(BaseWidget):
+class ChangedColumns(BaseWidget):
     """Detailed changes in Columns"""
     CODE = 10
-    NAME = "View Change in a Column"
-    PARENT = ChangedColumns.CODE
+    NAME = "View Changes in a Column"
+    PARENT = ChangedTables.CODE
 
     def do (self):
         df = pandas.DataFrame()
 
         #dataframe containing all changes
-        changed_row = mem.get('rowChanged')
+        changed_row = mem.get('all_changes')
 
         selected_table = mem.get('selected_tbl')
         selected_column = mem.get('selected_clmn')
 
         #obtaining cropped dataframe of changes for selected table
-        for i in changed_row:
-            if(selected_table in list(i.keys())):
-                df = i.get(selected_table)
-
-        # for j in (i for i in changed_row if selected_table in list(i.keys())):
-        #     df = i.get(selected_table)
+        for j in (i for i in changed_row if selected_table in list(i.keys())):
+            df = j.get(selected_table)
 
         #user selection
         selection = int(input('Column: '))
 
         #obtaining a cropped dataframe for the selected column
-        for i in selected_column:
-            if selection in i.keys():
-                value = i.get(selection)
+        for j in (i for i in selected_column if selection in i.keys()):
+            value = j.get(selection)
+
 
         #replacing null values (values that haven't been changed or have benn deleted)       
         user_selection = df.loc[:,value ].fillna(">>??<<")
