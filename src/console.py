@@ -137,7 +137,8 @@ def render_changedTable(value, user_selection):
 
     #iterating over rows of the change dataframe(for user selected column>>value) 
     for index, row in user_selection.iterrows():
-        table.add_row(str(index + 1), str(row.get('self')), str(row.get('other')))
+        if not(row.get('self') == ">>??<<" and row.get('other') == ">>??<<"):
+            table.add_row(str(index + 1), str(row.get('self')), str(row.get('other')))
 
     console.print(table)
         
