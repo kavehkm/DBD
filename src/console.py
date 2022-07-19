@@ -92,7 +92,7 @@ def render_compare(new, deleted, changed):
     deleted_columns = Columns(title='Deleted')
     # changed
     changed_style = Style(color='cyan')
-    changed_columns = Columns(title='Changed')
+    changed_columns = Columns(title='Changed Tables')
 
     for n in new:
         new_columns.add_renderable(Panel(n, style=new_style))
@@ -108,7 +108,10 @@ def render_compare(new, deleted, changed):
     print(new_columns, deleted_columns, changed_columns, sep='\n\n')
 
 def render_changedColumns(col,sel):
-    changed_columns = Columns(title='Changed')
+    changed_columns = Columns(title='Changed Columns')
+
+    #to check numeric choices coresspondence with changed columns
+    #in changedField section
     tlist = []
     for k,v in col.items():
         if (k == sel):

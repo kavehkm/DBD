@@ -68,16 +68,24 @@ class Snap(object):
     def changed(self, other):
         """common frames that changed"""
 
+        #saving changed column titles
         column_changed = {}
-        detail_changed = []
+
+        #saving details of the changes in each column
+        rows_changed = []
+
         for frame in self.common(other):
             left, right = self.data_frames[frame].align(other.data_frames[frame], join='outer')
             r = left.compare(right)
             
             if not r.empty:
-                detail_changed.append({frame:r})
+                rows_changed.append({frame:r})
+
+                #using sets to omit redundancy
                 column_changed[frame]=set()
+                
                 for c, i in r.items():
                     column_changed.get(frame).add(c[0])
         
-        return [column_changed,detail_changed]
+
+        return [column_changed,rows_changed]
