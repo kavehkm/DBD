@@ -124,3 +124,21 @@ def render_changedColumns(col,sel):
                 tlist.append({i:values})
     print(changed_columns)
     return tlist
+
+def render_changedTable(value, user_selection):
+
+    #creating a table for changes in the selected column
+    table = Table (title = f"Changes in {value} column")
+
+    #adding column to the table
+    table.add_column("#row")
+    table.add_column("Before", style="cyan")
+    table.add_column("After", style="green")
+
+    #iterating over rows of the change dataframe(for user selected column>>value) 
+    for index, row in user_selection.iterrows():
+        table.add_row(str(index + 1), str(row.get('self')), str(row.get('other')))
+
+    console.print(table)
+        
+
