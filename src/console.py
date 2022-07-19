@@ -98,6 +98,26 @@ def render_compare(new, deleted, changed):
         new_columns.add_renderable(Panel(n, style=new_style))
     for d in deleted:
         deleted_columns.add_renderable(Panel(d, style=deleted_style))
-    for c in changed:
-        changed_columns.add_renderable(Panel(c, style=changed_style))
+    for c, col in enumerate(changed):
+        panel = Panel(
+            title=str(c),
+            renderable='[yellow]{}'.format(col)
+        )
+        changed_columns.add_renderable(panel)
+        
     print(new_columns, deleted_columns, changed_columns, sep='\n\n')
+
+def render_changedColumns(col,sel):
+    changed_columns = Columns(title='Changed')
+    tlist = []
+    for k,v in col.items():
+        if (k == sel):
+            for i, values in enumerate(v):
+                panel = Panel(
+                    title = str (i),
+                    renderable = '[yellow]{}'.format(values)
+                )
+                changed_columns.add_renderable(panel)
+                tlist.append({i:values})
+    print(changed_columns)
+    return tlist

@@ -1,4 +1,5 @@
 # internal
+import pandas
 from src import mem
 from src import console
 from src import settings
@@ -126,14 +127,17 @@ class Compare(BaseWidget):
         snap1 = snaps[int(input('Snap1: '))]
         snap2 = snaps[int(input('Snap2: '))]
         # compare
+
         deleted = snap1.difference(snap2)
         new = snap1.r_difference(snap2)
         changed = snap1.changed(snap2)
+        mem.set("columnChanged", changed[0])
+        mem.set("detailedChanged", changed[1])
         # generate report
-        if not any([deleted, new, changed]):
+        if not any([deleted, new, changed[0]]):
             console.print('No changes detected')
         else:
-            console.render_compare(new, deleted, changed)
+            console.render_compare(new, deleted, changed[0])
 
 
 class Columns(BaseWidget):
@@ -160,6 +164,46 @@ class Records(BaseWidget):
         records = self.parent.current_database.records(table)
         console.render_records(columns, records)
 
+class ChangedColumns(BaseWidget):
+    """Changed Columns in a Table"""
+    CODE = 9
+    NAME = 'ChangedColumns'
+    PARENT = Compare.CODE
+
+    def do(self):
+        
+        changed_columns = mem.get('columnChanged',[])
+        selected_col = list(changed_columns.keys())[int(input('Column: '))]
+        a = console.render_changedColumns(changed_columns,selected_col)
+        mem.set('selected_col', selected_col)
+        mem.set('selectedDetail', a)
+        
+        
+
+class DetailedChanges(BaseWidget):
+    """Detailed changes in Columns"""
+    CODE = 10
+    NAME = "DetailedChanges"
+    PARENT = ChangedColumns.CODE
+
+    def do (self):
+        df = pandas.DataFrame()
+        changed_columns = mem.get('detailedChanged')
+        selected_column = mem.get('selected_col')
+        selected_detail = mem.get('selectedDetail')
+        for i in changed_columns:
+            if(selected_column in list(i.keys())):
+                df = i.get(selected_column)
+        selection = int(input('Column: '))
+        for i in selected_detail:
+            if selection in i.keys():
+                value = i.get(selection)
+        user_selection = df.loc[:,value ].fillna(-1)
+        
+        for index, row in user_selection.iterrows():
+            if not(row.get('self') == -1 and row.get('other') == -1):
+                console.print(f"Change in line {index} from {row.get('self')} to {row.get('other')}")
+        df.iloc[0:0]
 
 # initialize widgets and set relations
 WIDGETS = {
