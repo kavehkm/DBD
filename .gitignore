@@ -136,3 +136,6 @@ settings.json
 
 # snap directory
 snaps/
+
+# sqlite databases
+*.db

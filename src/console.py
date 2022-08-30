@@ -92,12 +92,58 @@ def render_compare(new, deleted, changed):
     deleted_columns = Columns(title='Deleted')
     # changed
     changed_style = Style(color='cyan')
-    changed_columns = Columns(title='Changed')
+    changed_columns = Columns(title='Changed Tables')
 
     for n in new:
         new_columns.add_renderable(Panel(n, style=new_style))
     for d in deleted:
         deleted_columns.add_renderable(Panel(d, style=deleted_style))
-    for c in changed:
-        changed_columns.add_renderable(Panel(c, style=changed_style))
+    for c, col in enumerate(changed):
+        panel = Panel(
+            title=str(c),
+            renderable='[yellow]{}'.format(col)
+        )
+        changed_columns.add_renderable(panel)
+        
     print(new_columns, deleted_columns, changed_columns, sep='\n\n')
+
+def render_changedColumns(col,sel):
+    #col: all changed tables
+    #sel: user selected table
+    
+    changed_columns = Columns(title='Changed Columns')
+
+    #to check numeric choices coresspondence with changed columns
+    #in changedField section
+    tlist = []
+    for val in (v for k, v in col.items() if k == sel):
+        for i, values in enumerate (val):
+            panel = Panel(
+                    title = str (i),
+                    renderable = '[yellow]{}'.format(values)
+                )
+            changed_columns.add_renderable(panel)
+            tlist.append({i:values})
+
+
+    print(changed_columns)
+    return tlist
+
+def render_changedTable(value, user_selection):
+
+    #creating a table for changes in the selected column
+    table = Table (title = f"Changes in {value} column")
+
+    #adding column to the table
+    table.add_column("#row")
+    table.add_column("Before", style="cyan")
+    table.add_column("After", style="green")
+
+    #iterating over rows of the change dataframe(for user selected column>>value) and omitting values that haven't been changed in the selected column (but have changes in others)
+    for index, row in user_selection.iterrows():
+        if not(row.get('self') == ">>??<<" and row.get('other') == ">>??<<"):
+            table.add_row(str(index + 1), str(row.get('self')), str(row.get('other')))
+
+    console.print(table)
+        
+
